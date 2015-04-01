@@ -718,6 +718,7 @@ def test_generate():
                   '   .. py:attribute:: Class.inst_attr_comment',
                   '   .. py:attribute:: Class.inst_attr_string',
                   '   .. py:method:: Class.inheritedmeth()',
+                  '   .. py:generatormethod:: Class.yodele()',
                   ],
                  'class', 'Class', member_order='bysource', all_members=True)
     del directive.env.ref_context['py:module']
@@ -889,15 +890,27 @@ class Class(Base):
         # undocumented special method
         pass
 
+    def yodele(self):
+        """a generator."""
+        yield True
+
 
 class CustomDict(dict):
     """Docstring."""
+
 
 def function(foo, *args, **kwds):
     """
     Return spam.
     """
     pass
+
+
+def gen(foo, *args, **kwds):
+    """
+    Yield something.
+    """
+    yield 'something'
 
 
 class Outer(object):

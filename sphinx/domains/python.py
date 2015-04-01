@@ -581,6 +581,34 @@ class PythonModuleIndex(Index):
         return content, collapse
 
 
+class PyGeneratorMixin(object):
+    """
+    Mixin for generator directives.
+    """
+    def handle_signature(self, sig, signode):
+        ret = super(PyGeneratorMixin, self).handle_signature(sig, signode)
+        signode.insert(0, addnodes.desc_annotation('generator ', 'generator '))
+        return ret
+
+
+class PyGeneratorFunction(PyGeneratorMixin, PyModulelevel):
+    """
+    Directive to mark generators.
+    """
+    def run(self):
+        self.name = 'py:function'
+        return PyModulelevel.run(self)
+
+
+class PyGeneratorMethod(PyGeneratorMixin, PyClassmember):
+    """
+    Directive to mark generator methods.
+    """
+    def run(self):
+        self.name = 'py:method'
+        return PyClassmember.run(self)
+
+
 class PythonDomain(Domain):
     """Python language domain."""
     name = 'py'
@@ -610,7 +638,10 @@ class PythonDomain(Domain):
         'currentmodule':   PyCurrentModule,
         'decorator':       PyDecoratorFunction,
         'decoratormethod': PyDecoratorMethod,
+        'generator':       PyGeneratorFunction,
+        'generatormethod': PyGeneratorMethod,
     }
+
     roles = {
         'data':  PyXRefRole(),
         'exc':   PyXRefRole(),

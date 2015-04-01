@@ -11,6 +11,7 @@
 
 import re
 
+from functools import partial
 from six import PY3, binary_type
 from six.moves import builtins
 
@@ -23,8 +24,13 @@ inspect = __import__('inspect')
 memory_address_re = re.compile(r' at 0x[0-9a-f]{8,16}(?=>$)')
 
 
+def isgeneratorfunction(func):
+    """docstring for isgenerator"""
+    if type(func) is partial:
+        func = func.func
+    return inspect.isgeneratorfunction(func)
+
 if PY3:
-    from functools import partial
 
     def getargspec(func):
         """Like inspect.getargspec but supports functools.partial as well."""
@@ -61,7 +67,6 @@ if PY3:
         return inspect.getfullargspec(func)
 
 else:  # 2.6, 2.7
-    from functools import partial
 
     def getargspec(func):
         """Like inspect.getargspec but supports functools.partial as well."""

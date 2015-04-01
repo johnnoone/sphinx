@@ -30,7 +30,8 @@ from sphinx.application import ExtensionError
 from sphinx.util.nodes import nested_parse_with_titles
 from sphinx.util.compat import Directive
 from sphinx.util.inspect import getargspec, isdescriptor, safe_getmembers, \
-    safe_getattr, object_description, is_builtin_class_method
+    safe_getattr, object_description, is_builtin_class_method, \
+    isgeneratorfunction
 from sphinx.util.docstrings import prepare_docstring
 
 
@@ -1388,6 +1389,30 @@ class InstanceAttributeDocumenter(AttributeDocumenter):
         AttributeDocumenter.add_content(self, more_content, no_docstring=True)
 
 
+class GeneratorDocumenter(FunctionDocumenter):
+    """
+    Specialized Documenter subclass for generators.
+    """
+    objtype = 'generator'
+    priority = 5  # must be more than FunctionDocumenter
+
+    @classmethod
+    def can_document_member(cls, member, membername, isattr, parent):
+        return isgeneratorfunction(member)
+
+
+class GeneratorMethodDocumenter(MethodDocumenter):
+    """
+    Specialized Documenter subclass for generator methods.
+    """
+    objtype = 'generatormethod'
+    priority = 10  # must be more than GeneratorDocumenter
+
+    @classmethod
+    def can_document_member(cls, member, membername, isattr, parent):
+        return isgeneratorfunction(member) and inspect.ismethod(member)
+
+
 class AutoDirective(Directive):
     """
     The AutoDirective class is used for all autodoc directives.  It dispatches
@@ -1515,6 +1540,8 @@ def setup(app):
     app.add_autodocumenter(MethodDocumenter)
     app.add_autodocumenter(AttributeDocumenter)
     app.add_autodocumenter(InstanceAttributeDocumenter)
+    app.add_autodocumenter(GeneratorDocumenter)
+    app.add_autodocumenter(GeneratorMethodDocumenter)
 
     app.add_config_value('autoclass_content', 'class', True)
     app.add_config_value('autodoc_member_order', 'alphabetic', True)
